@@ -13,19 +13,39 @@ export default function CostingPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try { setRows(await fetchGroupCostRows()); }
-      catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
-      finally { setLoading(false); }
-    })();
-  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return rows;
     return rows.filter(r => r.groupName.toLowerCase().includes(q));
   }, [rows, search]);
+
+  const handleRefresh = async () => {
+      setLoading(true);
+      setErr('');
+    
+      try {
+        const latestRows = await fetchGroupCostRows();
+        setRows(latestRows);
+        setEditValues({});
+      } catch (e) {
+        setErr(e instanceof Error ? e.message : String(e));
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+      // 3. UI reload karo
+      setRows(latestRows);
+      setEditValues({});
+  
+      alert("Cost prices refreshed successfully.");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadRows = async () => {
     setLoading(true);
@@ -70,7 +90,7 @@ export default function CostingPage() {
         />
       
         <button
-          onClick={loadRows}
+          onClick={handleRefresh}
           disabled={loading}
           className="btn-secondary flex items-center gap-2"
         >
