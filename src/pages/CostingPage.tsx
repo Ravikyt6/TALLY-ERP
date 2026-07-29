@@ -21,27 +21,16 @@ export default function CostingPage() {
   }, [rows, search]);
 
   const handleRefresh = async () => {
-      setLoading(true);
-      setErr('');
-    
-      try {
-        const latestRows = await fetchGroupCostRows();
-        setRows(latestRows);
-        setEditValues({});
-      } catch (e) {
-        setErr(e instanceof Error ? e.message : String(e));
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    setErr('');
   
-      // 3. UI reload karo
+    try {
+      const latestRows = await fetchGroupCostRows();
+  
       setRows(latestRows);
       setEditValues({});
-  
-      alert("Cost prices refreshed successfully.");
     } catch (e) {
-      console.error(e);
+      setErr(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
@@ -54,7 +43,7 @@ export default function CostingPage() {
     try {
       const data = await fetchGroupCostRows();
       setRows(data);
-      setEditValues({}); // Reset edited values
+      setEditValues({});
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
