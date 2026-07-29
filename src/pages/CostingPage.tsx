@@ -3,6 +3,16 @@ import { Calculator, AlertCircle, Search, X, Save, Loader2, Check } from 'lucide
 import { Card, PageHeader, Spinner, EmptyState } from '../components/ui';
 import { fetchGroupCostRows, saveGroupCostPrice, type GroupCostRow } from '../lib/queries';
 import { fmtINR } from '../lib/format';
+import {
+  Calculator,
+  AlertCircle,
+  Search,
+  X,
+  Save,
+  Loader2,
+  Check,
+  RefreshCw
+} from 'lucide-react';
 
 export default function CostingPage() {
   const [rows, setRows] = useState<GroupCostRow[]>([]);
@@ -27,6 +37,25 @@ export default function CostingPage() {
     return rows.filter(r => r.groupName.toLowerCase().includes(q));
   }, [rows, search]);
 
+  const loadRows = async () => {
+    setLoading(true);
+    setErr('');
+  
+    try {
+      const data = await fetchGroupCostRows();
+      setRows(data);
+      setEditValues({}); // Reset edited values
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    loadRows();
+  }, []);
+
   const saveCost = async (groupId: string, groupName: string) => {
     setSaving(groupId);
     try {
@@ -43,7 +72,25 @@ export default function CostingPage() {
 
   return (
     <div>
-      <PageHeader title="Costing" subtitle="Manage cost prices for item groups" icon={<Calculator size={20} />} />
+      <div className="flex items-center justify-between mb-4">
+        <PageHeader
+          title="Costing"
+          subtitle="Manage cost prices for item groups"
+          icon={<Calculator size={20} />}
+        />
+      
+        <button
+          onClick={loadRows}
+          disabled={loading}
+          className="btn-secondary flex items-center gap-2"
+        >
+          <RefreshCw
+            size={16}
+            className={loading ? "animate-spin" : ""}
+          />
+          Refresh
+        </button>
+      </div>
       <Card className="mb-4 p-4">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
